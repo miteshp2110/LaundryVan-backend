@@ -8,7 +8,7 @@ const optionsForJwt = {
 
 const optionsForRefreshToken = {
     algorithm:"HS256",
-    expiresIn:"150d"
+    expiresIn:"1m"
 }
 
 function getJwtToken (payload={}){
@@ -34,54 +34,57 @@ function getRefreshToken (payload={}){
 
 
 
-function verifyJwtToken(token,role=''){
+function verifyJwtToken(token){
     try{
         const isValid = jwt.verify(token,JWT_SECRET,{algorithms:"HS256"})
-        if(role){
-            if(isValid.role===role){
-                return {email:isValid.email}
-            }
-            else{
-                return false
-            }
+        if(isValid.role==='user'){
+            return {email:isValid.email}
+        }
+        else{
+            return 'invalid'
         }
 
-        return {email:isValid.email}
 
     }
     
     catch(err){
         if(err.name==="TokenExpiredError"){
-            console.log("Token Expired")
+            return 'expired'
         }
         else if(err.name==="JsonWebTokenError"){
-            console.log("Invalid Token")
+            return 'invalid'
         }
         else{
-            console.log("Unknown Error")
+            return 'invalid'
         }
-        return false
     }
 }
 
 function verifyRefreshToken(token){
     try{
-        jwt.verify(token,JWT_SECRET,{algorithms:"HS256"})
-        return true
+        const isValid = jwt.verify(token,JWT_SECRET,{algorithms:"HS256"})
+
+        if(isValid.type === 'refresh'){
+            return isValid.email
+        }
+        else{
+            return 'invalid'
+        }
 
     }
     
     catch(err){
-
-        return false
+        if(err.name==="TokenExpiredError"){
+            return 'expired'
+        }
+        else if(err.name==="JsonWebTokenError"){
+            return 'invalid'
+        }
+        else{
+            return 'invalid'
+        }
     }
 }
 
-// verifyJwtToken("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJib2R5IjoidGVzdCIsImlhdCI6MTc0NDkxNDA1MywiZXhwIjoxNzQ0OTE0MTEzfQ.MDEr6GkbjmnMna5SenBbNCr8ezabSmsd1TQRrfnx908", "user")
 
-// // console.log(getRefreshToken({email:"test"})) 
-// console.log(verifyRefreshToken("eyJhciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InRlc3QiLCJpYXQiOjE3NDQ5MTU0NDcsImV4cCI6MTc1Nzg3NTQ0N30.Tytbdhk9EuS9xY5YgSoLm2YspBDgsoHpQEUAZ6wSbRI")) 
-
-
-
-module.exports = {getJwtToken,verifyJwtToken}
+module.exports = {getJwtToken,verifyJwtToken,getRefreshToken,verifyRefreshToken}
