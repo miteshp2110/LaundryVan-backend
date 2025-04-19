@@ -1,6 +1,6 @@
 const { pool } = require("../config/db")
 
-const QUERY_EXISTING_USER_DEFAULT = "SELECT password FROM users WHERE email = ? AND authType = 'password'"
+const QUERY_EXISTING_USER_DEFAULT = "SELECT authType,password FROM users WHERE email = ?"
 const QUERY_EXISTING_USER_GOOGLE = "SELECT * FROM users WHERE email = ? AND authType = 'google'"
 
 
@@ -13,7 +13,12 @@ async function checkExistingUserDefault(email){
             return false
         }
         else{
-            return result[0].password
+            if(result[0].authType === 'password'){
+                return result[0].password
+            }
+            else{
+                return 'google'
+            }
         }
         
     }

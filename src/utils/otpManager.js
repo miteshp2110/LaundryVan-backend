@@ -1,6 +1,6 @@
 function getOtp(){
-    const otp = (Math.floor(1000 + Math.random() * 9000)).toString()
-    return otp.toString()
+    const otp = (Math.floor(1000 + Math.random() * 9000))
+    return otp
 }
 
 module.exports = getOtp
