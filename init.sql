@@ -78,7 +78,6 @@ CREATE TABLE IF NOT EXISTS category (
   service_id  INT           NOT NULL,
   name        VARCHAR(50)   NOT NULL,
   description VARCHAR(150),
-  iconUrl     VARCHAR(255)  NOT NULL,
   FOREIGN KEY (service_id)
     REFERENCES services(id)
     ON DELETE CASCADE
