@@ -1,17 +1,22 @@
 const { verifyJwtToken } = require("../utils/jwtManager");
 
-const checkAdmin = (async(req,res,next)=>{
+const checkUser = (async(req,res,next)=>{
     try{
         const {authorization} = req.headers
         if(!authorization){
-            return res.status(400).json({message:"Token Required"})
+            return res.status(400).json({error:"Token Required"})
         }  
         const token = authorization.split(' ')[1]
         let verification = verifyJwtToken(token)
-        if(verification === false){
-            return res.status(401).json({message:"Unauthorized"})
+        if(verification === 'invalid'){
+            return res.status(401).json({error:"Unauthorized"})
         }
-        req.user = verification.email
+        else{
+            if(verification === 'expired'){
+                return res.status(401).json({error:"Expired"})
+            }
+        }
+        req.user = verification
         next()
 
     }
@@ -21,4 +26,4 @@ const checkAdmin = (async(req,res,next)=>{
     }
 })
 
-module.exports=checkAdmin
+module.exports=checkUser

@@ -3,12 +3,12 @@ const { JWT_SECRET } = require('../config/secrets')
 
 const optionsForJwt = {
     algorithm:"HS256",
-    expiresIn:"1m"
+    expiresIn:"7d"
 }
 
 const optionsForRefreshToken = {
     algorithm:"HS256",
-    expiresIn:"1m"
+    expiresIn:"150d"
 }
 
 function getJwtToken (payload={}){

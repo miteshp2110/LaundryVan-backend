@@ -19,30 +19,9 @@ const continueWithGoogle = (async(req,res)=>{
 
         const {name,email,picture} = payload
         
-        const [result] = await pool.query("Select count(*) as count from admins where email = ?",[email])
+        const [result] = await pool.query("Select count(*) as count from users where email = ?",[email])
         
-        if(result[0].count === 1){
-            return res.status(200).json({Message:"isAdmin",token:"",email:email,name:name,profile_url:""})
-        }
-        else{
-            const [checkUser] = await pool.query("Select count(*) as count from users where email = ?",[email])
-
-            if(checkUser[0].count === 1){
-                const payload = {
-                    email : email,
-                    role : 'user'
-                }
-                return res.status(200).json({Message:"Success",token:getJwtToken(payload),email:email,name:name,profile_url:picture})
-            }
-            else{
-                await pool.query("insert into users (name,email,profile_url) values (?,?,?)",[name,email,picture])
-                const payload = {
-                    email : email,
-                    role : "user"
-                }
-                return res.status(200).json({Message:"Success",token:getJwtToken(payload),email:email,name:name,profile_url:picture})
-            }
-        }
+        
 
     }
     catch(err){
