@@ -35,6 +35,7 @@ app.get("/test",(req,res)=>{
 app.use("/api/auth",require("./routes/auth-routes"))
 app.use("/api/address",require("./routes/address-routes"))
 app.use("/api/services",require("./routes/services-routes"))
+app.use("/api/promotions",require("./routes/promotions-routes"))
 
 
 module.exports = app

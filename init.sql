@@ -105,14 +105,24 @@ CREATE TABLE IF NOT EXISTS promotions (
   description        TEXT,
   discount_percentage DECIMAL(5,2),
   fixed_discount     DECIMAL(5,2),
-  usage_count              INT             NOT NULL,
   threshHold         DECIMAL(5,2)    NOT NULL,
   coupon_code        VARCHAR(50)     UNIQUE,
-  valid_from         DATETIME,
-  valid_to           DATETIME,
+  valid_from         DATE,
+  valid_to           DATE,
+  promotionImageUrl  VARCHAR(255) NOT NULL,
   is_active          BOOLEAN         NOT NULL DEFAULT TRUE,
   created_at         DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB;
+
+
+CREATE EVENT IF NOT EXISTS deactivate_expired_promotions
+ON SCHEDULE EVERY 1 DAY
+STARTS CURRENT_TIMESTAMP
+DO
+  UPDATE promotions
+  SET is_active = FALSE
+  WHERE valid_to < CURDATE()
+    AND is_active = TRUE;
 
 -- 8. vans
 CREATE TABLE IF NOT EXISTS vans (
