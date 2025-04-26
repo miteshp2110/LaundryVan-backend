@@ -1,4 +1,5 @@
 const { pool } = require("../../config/db")
+const { groupOrders } = require("../../utils/grouping")
 
 const insertOrderQuery = "Insert into orders (user_id, address,pickup_date,pickup_time,delivery_time,delivery_date,promotion_id,payment_mode,payment_status,order_total,order_status,van_id) values ((select id from users where email = ?),?,?,?,?,?,?,?,?,?,1,(select id from vans where region_id = (select region_id from addresses where id = ?)))"
 
@@ -57,4 +58,21 @@ const addOrder = async (req, res) => {
     }
 } 
 
-module.exports = { addOrder}
+
+const getPreviousOrders = async (req,res)=>{
+    try{
+        const {email} = req.user
+        const [result] = await pool.query("SELECT o.id AS oId, a.addressType AS address, o.pickup_time, o.pickup_date, o.delivery_time, o.delivery_date, o.payment_status, o.payment_mode,o.order_total, o.order_status AS currentStatus, i.name AS item,i.price as price, oi.quantity AS quantity, s.name AS service FROM orders AS o JOIN addresses AS a ON a.id = o.address JOIN order_items AS oi ON oi.order_id = o.id JOIN items AS i ON i.id = oi.item_id JOIN category AS c ON c.id = i.category_id JOIN services AS s ON s.id = c.service_id WHERE o.id in (select id from orders where user_id in (select id from users where email = ?))",[email])
+
+        const [statusHistory] = await pool.query("select * from order_status_history where order_id in (select id from orders where user_id = (select id from users where email = ?))",[email])
+
+        return res.status(200).json(groupOrders(result,statusHistory))
+        
+    }
+    catch(err){
+        console.error(err);
+        res.status(500).json({error: "Internal server error"});
+    }
+}
+
+module.exports = { addOrder,getPreviousOrders}

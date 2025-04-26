@@ -68,8 +68,8 @@ CREATE TABLE IF NOT EXISTS services (
   id          INT           AUTO_INCREMENT PRIMARY KEY,
   name        VARCHAR(50)   NOT NULL UNIQUE,
   description VARCHAR(200),
-  iconUrl     VARCHAR(255)  NOT NULL UNIQUE,
-  color       VARCHAR(10)   NOT NULL
+  iconUrlSmall     VARCHAR(255)  NOT NULL UNIQUE,
+  iconUrlLarge     VARCHAR(255)  NOT NULL UNIQUE,
 ) ENGINE=InnoDB;
 
 -- 5. category
