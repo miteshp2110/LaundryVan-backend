@@ -41,5 +41,25 @@ const getServiceDetails = async(req,res)=>{
     }
 }
 
+const searchServices = async(req,res)=>{
+    try{
+        const {name} = req.query || {}
+        if(!name){
+            return res.status(400).json({error: "Name is required"})
+        }
+        const query = "Select * from services where name like ? limit 5"
+        const [result] = await pool.query(query,[`%${name}%`])
+    
+        if(result.length === 0){
+            return res.status(404).json({message: "No services found"})
+        }
+        return res.status(200).json(result)
+    }
+    catch(err){
+        console.error(err);
+        res.status(500).json({error: "Internal server error"});
+    }
+}
 
-module.exports = {getServices,getServiceDetails}
+
+module.exports = {getServices,getServiceDetails,searchServices}

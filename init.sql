@@ -149,8 +149,7 @@ CREATE TABLE IF NOT EXISTS orders (
   id             INT              AUTO_INCREMENT PRIMARY KEY,
   user_id        INT              NOT NULL,
   address        INT              NOT NULL,
-  region_id      INT,
-  driver_id      INT,
+  van_id      INT,
   order_status   INT,
   pickup_time    TIME             NOT NULL,
   pickup_date    DATE             NOT NULL,
@@ -169,11 +168,7 @@ CREATE TABLE IF NOT EXISTS orders (
     REFERENCES addresses(id)
     ON DELETE RESTRICT
     ON UPDATE CASCADE,
-  FOREIGN KEY (region_id)
-    REFERENCES regions(id)
-    ON DELETE SET NULL
-    ON UPDATE CASCADE,
-  FOREIGN KEY (driver_id)
+  FOREIGN KEY (van_id)
     REFERENCES vans(id)
     ON DELETE SET NULL
     ON UPDATE CASCADE,
@@ -223,9 +218,9 @@ CREATE TABLE IF NOT EXISTS order_status_history (
 CREATE TABLE IF NOT EXISTS logistics_ledger (
   id           INT           AUTO_INCREMENT PRIMARY KEY,
   order_id     INT           NOT NULL,
-  pickedUp_at  TIMESTAMP,
+  pickedUp_at  DATETIME,
   pickedUp_by  INT,
-  delivered_at TIMESTAMP,
+  delivered_at DATETIME,
   delivered_by INT,
   FOREIGN KEY (order_id)
     REFERENCES orders(id)
@@ -248,6 +243,17 @@ CREATE TABLE IF NOT EXISTS admin (
   email     VARCHAR(200),
   password  VARCHAR(255),
   createdAt TIMESTAMP
+) ENGINE=InnoDB;
+
+CREATE TABLE IF NOT EXISTS failed_orders (
+  id        INT           AUTO_INCREMENT PRIMARY KEY,
+  user_id  INT           NOT NULL,
+  order_total DECIMAL(5,2)       NOT NULL ,
+  createdAt TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id)
+    REFERENCES users(id)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE
 ) ENGINE=InnoDB;
 
 -- Re‐enable FK checks

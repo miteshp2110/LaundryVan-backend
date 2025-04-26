@@ -510,5 +510,8 @@ application/json
 | 401    | `{ "error": "Unauthorized" }`     |
 | 500    | `{ "error": "Internal Server Error" }` |
 
+
+
+
 *Last updated: April 19, 2025*
 

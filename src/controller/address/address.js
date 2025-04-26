@@ -9,7 +9,9 @@ const addAddress = async(req,res)=>{
             return res.status(400).json({error:"Invalid Body"})
         }
 
-        await pool.query("Insert into addresses(addressType,user_id,region_id,addressName,area,buildingNumber,landmark,latitude,longitude) values (?,(select id from users where email = ?),?,?,?,?,?,?,?)",[addressType,email,region_id,addressName,area,buildingNumber,landmark,latitude,longitude])
+        const addr = addressType.toLowerCase()
+
+        await pool.query("Insert into addresses(addressType,user_id,region_id,addressName,area,buildingNumber,landmark,latitude,longitude) values (?,(select id from users where email = ?),?,?,?,?,?,?,?)",[addr,email,region_id,addressName,area,buildingNumber,landmark,latitude,longitude])
 
         return res.status(201).json({message:"Address Added"})
 
