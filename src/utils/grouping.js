@@ -91,7 +91,79 @@ function groupOrders(items, statusHistory) {
   });
 }
 
+/**
+ * @param {Array<Object>} data
+ * @returns {Array<Object>}
+ *
+ * Output shape:
+ * [
+ *   {
+ *     sId,
+ *     Service,
+ *     largeIcon,
+ *     smallIcon,
+ *     categories: [
+ *       {
+ *         Category,
+ *         items: [
+ *           { itemId, Item, price, itemUrl },
+ *           …
+ *         ]
+ *       },
+ *       …
+ *     ]
+ *   },
+ *   …
+ * ]
+ */
+function groupByService(data) {
+  const serviceMap = data.reduce((acc, entry) => {
+    const {
+      sId,
+      Service,
+      largeIcon,
+      smallIcon,
+      Category,
+      itemId,
+      Item,
+      price,
+      itemUrl
+    } = entry;
+
+    // 1) Get or create the service bucket
+    if (!acc[sId]) {
+      acc[sId] = {
+        sId,
+        Service,
+        largeIcon,
+        smallIcon,
+        categories: []
+      };
+    }
+    const serviceBucket = acc[sId];
+
+    // 2) Get or create the category bucket under this service
+    let catBucket = serviceBucket.categories.find(cat => cat.Category === Category);
+    if (!catBucket) {
+      catBucket = {
+        Category,
+        items: []
+      };
+      serviceBucket.categories.push(catBucket);
+    }
+
+    // 3) Push the item
+    catBucket.items.push({ itemId, Item, price, itemUrl });
+
+    return acc;
+  }, {});
+
+  // 4) Return the array of services
+  return Object.values(serviceMap);
+}
+
+
 
 
   
-  module.exports = { groupItemsByCategory ,groupOrders};
+  module.exports = { groupItemsByCategory ,groupOrders,groupByService};

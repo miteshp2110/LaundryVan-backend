@@ -1,5 +1,5 @@
 const { pool } = require("../../config/db")
-const { groupItemsByCategory } = require("../../utils/grouping")
+const { groupItemsByCategory, groupByService } = require("../../utils/grouping")
 
 const getServices = async(req,res)=>{
     try{
@@ -61,5 +61,19 @@ const searchServices = async(req,res)=>{
     }
 }
 
+const mobileServiceAll = async(req,res)=>{
+    try{
 
-module.exports = {getServices,getServiceDetails,searchServices}
+        const [result] = await pool.query("SELECT s.id AS sId, s.name AS Service, s.iconUrlBig AS largeIcon, s.iconUrlSmall AS smallIcon, c.name AS Category, i.id AS itemId, i.name AS Item, i.price AS price, i.iconUrl AS itemUrl FROM services AS s INNER JOIN category AS c ON c.service_id = s.id INNER JOIN items AS i ON i.category_id = c.id")
+
+        return res.status(200).json(groupByService(result))
+    }
+    catch(err){
+        console.error(err);
+        res.status(500).json({error: "Internal server error"});
+    }
+
+}
+
+
+module.exports = {getServices,getServiceDetails,searchServices,mobileServiceAll}
