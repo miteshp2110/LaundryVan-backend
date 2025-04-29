@@ -120,21 +120,22 @@ function groupByService(data) {
   const serviceMap = data.reduce((acc, entry) => {
     const {
       sId,
-      Service,
+      service,
       largeIcon,
       smallIcon,
-      Category,
-      itemId,
-      Item,
+      category,
+      categoryId,
+      productId,
+      product,
       price,
-      itemUrl
+      productUrl
     } = entry;
 
     // 1) Get or create the service bucket
     if (!acc[sId]) {
       acc[sId] = {
         sId,
-        Service,
+        service,
         largeIcon,
         smallIcon,
         categories: []
@@ -143,17 +144,18 @@ function groupByService(data) {
     const serviceBucket = acc[sId];
 
     // 2) Get or create the category bucket under this service
-    let catBucket = serviceBucket.categories.find(cat => cat.Category === Category);
+    let catBucket = serviceBucket.categories.find(cat => cat.category === category);
     if (!catBucket) {
       catBucket = {
-        Category,
-        items: []
+        category,
+        categoryId,
+        products: []
       };
       serviceBucket.categories.push(catBucket);
     }
 
     // 3) Push the item
-    catBucket.items.push({ itemId, Item, price, itemUrl });
+    catBucket.products.push({ productId, product, price, productUrl });
 
     return acc;
   }, {});
