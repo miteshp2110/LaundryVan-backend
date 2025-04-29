@@ -27,7 +27,7 @@ const addAddress = async(req,res)=>{
 const getAllAddresses = async(req,res)=>{
     try{
         const {email} = req.user
-        const [result] = await pool.query("select id ,addressType , user_id , region_id , addressName , area, buildingNumber , landmark from addresses where user_id = (select id from users where email = ?)",[email])
+        const [result] = await pool.query("select id ,addressType , region_id , addressName  , area, buildingNumber , landmark , latitude , longitude from addresses where user_id = (select id from users where email = ?)",[email])
         return res.status(200).json(result)
 
     }
