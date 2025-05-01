@@ -27,7 +27,7 @@ function groupOrders(items, statusHistory) {
     const {
       oId,
       service,
-      item,
+      product,
       quantity,
       address,
       pickup_time,
@@ -61,10 +61,10 @@ function groupOrders(items, statusHistory) {
     const order = acc[oId];
     let svc = order.services.find(s => s.service === service);
     if (!svc) {
-      svc = { service, items: [] };
+      svc = { service, productList: [] };
       order.services.push(svc);
     }
-    svc.items.push({ item, quantity });
+    svc.productList.push({ product, quantity });
 
     return acc;
   }, {});
