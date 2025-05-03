@@ -6,12 +6,13 @@ const insertOrderQuery = "Insert into orders (user_id, address,pickup_date,picku
 
 const addOrder = async (req, res) => {
     const conn = await pool.getConnection()
-    const {productList=null, addressId=null, pickUpDate=null,pickUpTime=null,deliveryTime=null,deliveryDate=null,promotionId=null, paymentStatus=null,orderTotal = null} = req.body || {}
+    const {productList=null, addressId=null, pickUpDate=null,pickUpTime=null,deliveryTime=null,deliveryDate=null, paymentStatus=null,orderTotal = null,promotionId} = req.body || {}
     var {paymentMode = null} = req.body || {}
-        if(!productList || !addressId || !pickUpDate || !pickUpTime || !deliveryTime || !deliveryDate || !promotionId || !paymentMode || paymentStatus==null || !orderTotal){
+        if(!productList || !addressId || !pickUpDate || !pickUpTime || !deliveryTime || !deliveryDate || !paymentMode || paymentStatus==null || !orderTotal){
             return res.status(400).json({error: "Invalid body"})
         }
-
+        var promotion_id = promotionId==-1 ? null : promotionId
+        
         paymentMode = paymentMode.toLowerCase()
         
         const {email} = req.user 
@@ -25,7 +26,7 @@ const addOrder = async (req, res) => {
         await conn.beginTransaction()
 
 
-        const [orderId] = await conn.query(insertOrderQuery,[email,addressId,pickUpDate,pickUpTime,deliveryTime,deliveryDate,promotionId,paymentMode,paymentStatus,orderTotal,addressId])
+        const [orderId] = await conn.query(insertOrderQuery,[email,addressId,pickUpDate,pickUpTime,deliveryTime,deliveryDate,promotion_id,paymentMode,paymentStatus,orderTotal,addressId])
 
         var itemsInsertQuery = "Insert into order_items (order_id,item_id,quantity) values  "
 

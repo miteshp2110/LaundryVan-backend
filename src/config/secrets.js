@@ -10,5 +10,8 @@ module.exports = {
     MYSQL_LIMIT : process.env.MYSQL_LIMIT,
     MYSQL_DATABASE : process.env.MYSQL_DATABASE,
     JWT_SECRET : process.env.JWT_SECRET,
-    BCRYPT_SALT : process.env.BCRYPT_SALT
+    BCRYPT_SALT : process.env.BCRYPT_SALT,
+    TWILIO_ACCOUNT_SID : process.env.TWILIO_ACCOUNT_SID,
+    TWILIO_AUTH_TOKEN : process.env.TWILIO_AUTH_TOKEN,
+    TWILIO_PHONE_NUMBER : process.env.TWILIO_PHONE_NUMBER,
 }
