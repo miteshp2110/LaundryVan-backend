@@ -46,7 +46,7 @@ const isPromotionApplicable = async(req,res)=>{
             newPrice = orderTotal - promotion.fixed_discount
         }
         newPrice = Math.floor(newPrice)+1
-        return res.status(200).json({message: "Promotion is applicable",discountedPrice: newPrice})
+        return res.status(200).json({promotionId: promotionId,orderTotal: newPrice})
     }
     catch(err){
         console.error(err);
