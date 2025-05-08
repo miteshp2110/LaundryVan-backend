@@ -37,6 +37,7 @@ app.use("/api/address",require("./routes/address-routes"))
 app.use("/api/services",require("./routes/services-routes"))
 app.use("/api/promotions",require("./routes/promotions-routes"))
 app.use("/api/order",require("./routes/order-routes"))
+app.use("/api/profile",require("./routes/profile-routes"))
 
 
 module.exports = app

@@ -4,7 +4,7 @@ const fs = require("fs")
 
 const storage = multer.diskStorage({
     destination : (req,res,cb)=>{
-        cb(null,"uploads/")
+        cb(null,"profiles/")
     },
     filename : (req,file,cb)=>{
         const ext = path.extname(file.originalname)
@@ -22,9 +22,10 @@ const handleFileUpload = (req,res,next) =>{
             return res.status(400).json({error:err.message})
         }
         else if(err){
+            console.error(err)
             return res.status(500).json({error:"Internal Server Error"})
         }
-        req.imageName = req.file ? `${req.protocol}://${req.host}/uploads/${req.file.filename}` : null
+        req.imageName = req.file ? `${req.protocol}://${req.host}/profile/${req.file.filename}` : null
         next()
     })
     
