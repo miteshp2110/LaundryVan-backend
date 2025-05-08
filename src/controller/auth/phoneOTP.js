@@ -1,5 +1,6 @@
 const { pool } = require("../../config/db")
 const { TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_PHONE_NUMBER } = require("../../config/secrets")
+const { getJwtToken, getRefreshToken } = require("../../utils/jwtManager")
 const getOtp = require("../../utils/otpManager")
 const twilio = require("twilio")(TWILIO_ACCOUNT_SID,TWILIO_AUTH_TOKEN)
 
@@ -64,7 +65,18 @@ const validateOtp = async(req,res)=>{
             return res.status(401).json({error:"OTP not sent"})
         }
         else if (isExisting[0].otp === otp){
-            return res.status(200).json({message:"success"})
+            const [isUser] = await pool.query("select fullName,email,phone,profileUrl from users where phone = ?",[phone])
+            await pool.query("Delete from otp where phone = ?",[phone])
+        
+            if(isUser.length === 0){
+                return res.status(201).json({method:"phone", message:"success"})
+            }else{
+
+                return res.status(200).json({message:"success",jwt:getJwtToken({email:isUser[0].email,role:'user'}),refreshToken:getRefreshToken({type:'refresh',email:isUser[0].email}),user:{
+                    email:isUser[0].email,fullName:isUser[0].fullName,phone:isUser[0].phone,profileUrl:isUser[0].profileUrl
+                }})
+            }
+
             
         }
         else{

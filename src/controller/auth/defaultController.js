@@ -1,75 +1,43 @@
 const { pool } = require("../../config/db");
-const { deleteFile } = require("../../middleware/uploads");
-const { getHashedPassword, checkPassword } = require("../../utils/bcryptManager");
-const { checkExistingUserDefault } = require("../../utils/datbaseUtils");
+const { GOOGLE_CLIENT_ID } = require("../../config/secrets");
+const { OAuth2Client } = require('google-auth-library');
 const { getJwtToken, getRefreshToken } = require("../../utils/jwtManager");
 
-const CREATE_USER_QUERY = "INSERT INTO users(fullName,email,phone,authType,profileUrl) values (?,?,?,'password',?)"
+const CREATE_USER_QUERY = "INSERT INTO users(fullName,email,phone,profileUrl) values (?,?,?,?)"
 const DEFAULT_PROFILE_PLACEHOLDER_URL = "https://png.pngtree.com/png-clipart/20210129/ourmid/pngtree-default-male-avatar-png-image_2811083.jpg"
 
-const signUpWithPassword = async (req,res)=>{
-    const fileName = req.imageName || DEFAULT_PROFILE_PLACEHOLDER_URL
+const client = new OAuth2Client(GOOGLE_CLIENT_ID)
+
+const createNewUser = async (req,res)=>{
     try{
 
-        const {fullName=null,email=null,phone=null} = req.body || {}
+        const {idToken=null,phone=null} = req.body || {}
         
-        if(!fullName || !email || !password || !phone){
+        if(!idToken  || !phone){
             return res.status(400).json({error:"Invalid Body"})
         }
-        
-        const existingUser = await checkExistingUserDefault(email)
 
-        if(existingUser || existingUser === 'google'){
-            if(fileName!=DEFAULT_PROFILE_PLACEHOLDER_URL){
-                const splits = fileName.split("/")
-                deleteFile(splits[splits.length -1])
-            }
-            return res.status(409).json({error:"Email Already Exist"})
+        const ticket = await client.verifyIdToken({
+            idToken:idToken,
+            audience:GOOGLE_CLIENT_ID
+        })
+        const payload = ticket.getPayload()
+        
+        const {name,email,picture} = payload
+        
+        const [result] = await pool.query("Select count(id) as count from users where email = ?",[email])
+        if(result[0].count > 0){
+            return res.status(409).json({error:"User already exists"})
         }
-        
-        await pool.query(CREATE_USER_QUERY,[fullName,email,phone,fileName])
-        
-        return res.status(201).json({message:"User Created",jwt:getJwtToken({email:email,role:'user'}),refreshToken:getRefreshToken({user:{
-            email:email,fullName:fullName,phone:phone,profileUrl:fileName
-        },type:'refresh'})})
 
         
-    }
-    catch(e){
-        if(fileName!=DEFAULT_PROFILE_PLACEHOLDER_URL){
-            const splits = fileName.split("/")
-            deleteFile(splits[splits.length -1])
-        }
-        if(e.code === 'ER_DUP_ENTRY'){
-            return res.status(409).json({error:"Phone Number already exists."})
-        }
+        await pool.query(CREATE_USER_QUERY,[name,email,phone,picture])
         
-        console.error(e)
-        return res.status(500).json({error:"Internal Server Error"})
-    }
-}
+        return res.status(200).json({message:"success",jwt:getJwtToken({email:email,role:'user'}),refreshToken:getRefreshToken({type:'refresh',email:email}),user:{
+            email:email,fullName:name,phone:phone,profileUrl:picture
+        }})
 
-
-const loginWithPassword = async(req,res)=>{
-    try{
-
-        const {email=null,password=null} = req.body || {}
-        if(!email || !password){
-            return res.status(400).json({error:"Invalid Body"})
-        }
-        const existingCheck = await checkExistingUserDefault(email)
-        if(existingCheck != false && existingCheck !== 'google'){
-            if(await checkPassword(password,existingCheck)){
-                return res.status(200).json({message:"Success",jwt:getJwtToken({email:email,role:'user'}),refreshToken:getRefreshToken({email:email,type:'refresh'})})
-            }
-            else{
-                return res.status(401).json({error:"Wrong Password"})
-            }
-        }
-        else{
-            return res.status(400).json({error:"Email Does not Exist"})
-        }
-
+        
     }
     catch(e){
         console.error(e)
@@ -77,4 +45,6 @@ const loginWithPassword = async(req,res)=>{
     }
 }
 
-module.exports = {signUpWithPassword,loginWithPassword}
+
+
+module.exports = {createNewUser}
