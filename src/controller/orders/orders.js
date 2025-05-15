@@ -28,10 +28,10 @@ const addOrder = async (req, res) => {
 
         const [orderId] = await conn.query(insertOrderQuery,[email,addressId,pickUpDate,pickUpTime,deliveryTime,deliveryDate,promotion_id,paymentMode,paymentStatus,orderTotal,addressId])
 
-        var itemsInsertQuery = "Insert into order_items (order_id,item_id,quantity) values  "
+        var itemsInsertQuery = "Insert into order_items (order_id,item_id,quantity,item_price) values  "
 
         productList.forEach((item) => {
-            const newItemInsert = `(${orderId.insertId},${item.productId},${item.quantity}),`
+            const newItemInsert = `(${orderId.insertId},${item.productId},${item.quantity},(select price from items where id = ${item.productId})),`
             itemsInsertQuery += newItemInsert
         })
         itemsInsertQuery = itemsInsertQuery.slice(0, -1)
