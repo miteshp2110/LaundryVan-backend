@@ -29,6 +29,7 @@ function groupOrders(items, statusHistory) {
       service,
       product,
       quantity,
+      price,
       address,
       pickup_time,
       pickup_date,
@@ -64,7 +65,7 @@ function groupOrders(items, statusHistory) {
       svc = { service, productList: [] };
       order.services.push(svc);
     }
-    svc.productList.push({ product, quantity });
+    svc.productList.push({ product, quantity,price });
 
     return acc;
   }, {});
