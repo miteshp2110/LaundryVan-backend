@@ -3,6 +3,8 @@ const { groupOrders } = require("../../utils/grouping")
 
 const insertOrderQuery = "Insert into orders (user_id, address,pickup_date,pickup_time,delivery_time,delivery_date,promotion_id,payment_mode,payment_status,order_total,order_status,van_id) values ((select id from users where email = ?),?,?,?,?,?,?,?,?,?,1,(select id from vans where region_id = (select region_id from addresses where id = ?) limit 1))"
 
+const quickOrderQuery = "Insert into orders (user_id, address,pickup_date,pickup_time,delivery_time,delivery_date,payment_mode,payment_status,order_status,van_id,quick_order) values ((select id from users where email = ?),?,?,?,?,?,'cash',0,1,(select id from vans where region_id = (select region_id from addresses where id = ?) limit 1),1)"
+
 
 const addOrder = async (req, res) => {
     const conn = await pool.getConnection()
@@ -60,10 +62,51 @@ const addOrder = async (req, res) => {
 } 
 
 
+const addQuickOrder = async (req, res) => {
+    const conn = await pool.getConnection()
+    const {addressId=null, pickUpDate=null,pickUpTime=null,deliveryTime=null,deliveryDate=null} = req.body || {}
+        if(!addressId || !pickUpDate || !pickUpTime || !deliveryTime || !deliveryDate ){
+            return res.status(400).json({error: "Invalid body"})
+        }
+        
+        const {email} = req.user 
+    
+    try{
+
+    
+
+        await conn.beginTransaction()
+
+
+        const [orderId] = await conn.query("Insert into orders (user_id, address,pickup_date,pickup_time,delivery_time,delivery_date,payment_mode,payment_status,order_status,van_id,quick_order) values ((select id from users where email = ?),?,?,?,?,?,'cash',0,1,(select id from vans where region_id = (select region_id from addresses where id = ?) limit 1),1)",[email,addressId,pickUpDate,pickUpTime,deliveryTime,deliveryDate,addressId])
+
+    
+        await conn.query("Insert into order_status_history (order_id,order_status) values (?,1)",[orderId.insertId])
+
+        await conn.commit()
+
+        return res.status(200).json({message: "Order created successfully"})
+    }
+    catch(err){
+        
+        await conn.rollback()
+        console.error(err);
+        res.status(500).json({error: "Internal server error"});
+    }
+    finally{
+        conn.release()
+    }
+} 
+
+
 const getPreviousOrders = async (req,res)=>{
     try{
         const {email} = req.user
-        const [result] = await pool.query("SELECT o.id AS oId, a.addressType AS address, o.pickup_time, o.pickup_date, o.delivery_time, o.delivery_date, o.payment_status, o.payment_mode,o.order_total, o.order_status AS currentStatus, i.name AS product,i.price as price, oi.quantity AS quantity, oi.item_price as price, s.name AS service FROM orders AS o JOIN addresses AS a ON a.id = o.address JOIN order_items AS oi ON oi.order_id = o.id JOIN items AS i ON i.id = oi.item_id JOIN category AS c ON c.id = i.category_id JOIN services AS s ON s.id = c.service_id WHERE o.id in (select id from orders where user_id in (select id from users where email = ?))",[email])
+        // const [result] = await pool.query("SELECT o.id AS oId, a.addressType AS address, o.pickup_time, o.pickup_date, o.delivery_time, o.delivery_date, o.payment_status, o.payment_mode,o.order_total, o.order_status AS currentStatus, i.name AS product,i.price as price, oi.quantity AS quantity, oi.item_price as price, s.name AS service FROM orders AS o JOIN addresses AS a ON a.id = o.address JOIN order_items AS oi ON oi.order_id = o.id JOIN items AS i ON i.id = oi.item_id JOIN category AS c ON c.id = i.category_id JOIN services AS s ON s.id = c.service_id WHERE o.id in (select id from orders where user_id in (select id from users where email = ?))",[email])
+
+        const [result] = await pool.query("SELECT o.id AS oId, a.addressType AS address, o.pickup_time, o.pickup_date, o.delivery_time, o.delivery_date, o.payment_status, o.payment_mode, o.order_total, o.order_status AS currentStatus, i.name AS product, i.price, oi.quantity, oi.item_price, s.name AS service FROM orders AS o JOIN addresses AS a ON a.id = o.address LEFT JOIN order_items AS oi ON oi.order_id = o.id LEFT JOIN items AS i ON i.id = oi.item_id LEFT JOIN category AS c ON c.id = i.category_id LEFT JOIN services AS s ON s.id = c.service_id WHERE o.user_id = (SELECT id FROM users WHERE email = ?) ORDER BY o.id",[email])
+
+
 
         const [statusHistory] = await pool.query("select * from order_status_history where order_id in (select id from orders where user_id = (select id from users where email = ?))",[email])
 
@@ -76,4 +119,4 @@ const getPreviousOrders = async (req,res)=>{
     }
 }
 
-module.exports = { addOrder,getPreviousOrders}
+module.exports = { addOrder,getPreviousOrders,addQuickOrder}

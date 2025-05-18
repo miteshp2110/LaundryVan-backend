@@ -158,8 +158,9 @@ CREATE TABLE IF NOT EXISTS orders (
   promotion_id   INT,
   payment_mode   ENUM('cash','online') NOT NULL,
   payment_status BOOLEAN         NOT NULL DEFAULT FALSE,
-  order_total    DECIMAL(5,2)     NOT NULL,
+  order_total    DECIMAL(5,2)     NOT NULL DEFAULT 0.00,
   createdAt      TIMESTAMP        NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  quick_order    BOOLEAN         NOT NULL DEFAULT FALSE,
   FOREIGN KEY (user_id)
     REFERENCES users(id)
     ON DELETE CASCADE
