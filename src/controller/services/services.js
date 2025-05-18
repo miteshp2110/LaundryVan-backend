@@ -64,7 +64,7 @@ const searchServices = async(req,res)=>{
 const mobileServiceAll = async(req,res)=>{
     try{
 
-        const [result] = await pool.query("SELECT s.id AS sId, s.name AS service, s.iconUrlBig AS largeIcon, s.iconUrlSmall AS smallIcon, c.name AS category,c.id as categoryId, i.id AS productId, i.name AS product, i.price AS price, i.iconUrl AS productUrl FROM services AS s INNER JOIN category AS c ON c.service_id = s.id INNER JOIN items AS i ON i.category_id = c.id")
+        const [result] = await pool.query("SELECT s.id AS sId, s.name AS service, s.iconUrlBig AS largeIcon, s.iconUrlSmall AS smallIcon, c.name AS category,c.id as categoryId, i.id AS productId, i.name AS product, i.price AS price, i.iconUrl AS productUrl FROM services AS s INNER JOIN category AS c ON c.service_id = s.id INNER JOIN items AS i ON i.category_id = c.id where s.status = 1")
 
         return res.status(200).json(groupByService(result))
     }
