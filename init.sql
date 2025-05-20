@@ -38,6 +38,7 @@ CREATE TABLE IF NOT EXISTS users (
   password   VARCHAR(255),
   authType   ENUM('password','google'),
   profileUrl VARCHAR(255)  UNIQUE,
+  fcmToken   VARCHAR(255)  UNIQUE,
   createdAt  DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB;
 

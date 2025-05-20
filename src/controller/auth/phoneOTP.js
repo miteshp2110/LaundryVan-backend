@@ -55,11 +55,11 @@ const sendOtpForMobile = async(req,res)=>{
 
 const validateOtp = async(req,res)=>{
     try{
-        const {phone=null,otp=null} = req.body || {}
+        const {phone=null,otp=null,fcmToken=null} = req.body || {}
         if(!phone || !otp){
             return res.status(400).json({error:"Invalid Body"})
         }
-        // TODO: check in db if otp exists
+        
         const [isExisting] = await pool.query("Select otp from otp where phone = ?",[phone])
         if(isExisting.length === 0){
             return res.status(401).json({error:"OTP not sent"})
@@ -71,7 +71,7 @@ const validateOtp = async(req,res)=>{
             if(isUser.length === 0){
                 return res.status(201).json({method:"phone", message:"success"})
             }else{
-
+                await pool.query("UPDATE users SET fcmToken = ? WHERE phone = ?",[fcmToken,phone])
                 return res.status(200).json({message:"success",jwt:getJwtToken({email:isUser[0].email,role:'user'}),refreshToken:getRefreshToken({type:'refresh',email:isUser[0].email}),user:{
                     email:isUser[0].email,fullName:isUser[0].fullName,phone:isUser[0].phone,profileUrl:isUser[0].profileUrl
                 }})

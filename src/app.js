@@ -38,6 +38,7 @@ app.use("/api/services",require("./routes/services-routes"))
 app.use("/api/promotions",require("./routes/promotions-routes"))
 app.use("/api/order",require("./routes/order-routes"))
 app.use("/api/profile",require("./routes/profile-routes"))
+app.use("/api/notification",require("./routes/notification-route"))
 
 
 module.exports = app

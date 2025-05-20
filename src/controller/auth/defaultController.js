@@ -3,7 +3,7 @@ const { GOOGLE_CLIENT_ID } = require("../../config/secrets");
 const { OAuth2Client } = require('google-auth-library');
 const { getJwtToken, getRefreshToken } = require("../../utils/jwtManager");
 
-const CREATE_USER_QUERY = "INSERT INTO users(fullName,email,phone,profileUrl) values (?,?,?,?)"
+const CREATE_USER_QUERY = "INSERT INTO users(fullName,email,phone,profileUrl,fcmToken) values (?,?,?,?,?)"
 const DEFAULT_PROFILE_PLACEHOLDER_URL = "https://png.pngtree.com/png-clipart/20210129/ourmid/pngtree-default-male-avatar-png-image_2811083.jpg"
 
 const client = new OAuth2Client(GOOGLE_CLIENT_ID)
@@ -11,9 +11,9 @@ const client = new OAuth2Client(GOOGLE_CLIENT_ID)
 const createNewUser = async (req,res)=>{
     try{
 
-        const {idToken=null,phone=null} = req.body || {}
+        const {idToken=null,phone=null,fcmToken=null} = req.body || {}
         
-        if(!idToken  || !phone){
+        if(!idToken  || !phone || !fcmToken){
             return res.status(400).json({error:"Invalid Body"})
         }
 
@@ -31,7 +31,7 @@ const createNewUser = async (req,res)=>{
         }
 
         
-        await pool.query(CREATE_USER_QUERY,[name,email,phone,picture])
+        await pool.query(CREATE_USER_QUERY,[name,email,phone,picture,fcmToken])
         
         return res.status(200).json({message:"success",jwt:getJwtToken({email:email,role:'user'}),refreshToken:getRefreshToken({type:'refresh',email:email}),user:{
             email:email,fullName:name,phone:phone,profileUrl:picture
