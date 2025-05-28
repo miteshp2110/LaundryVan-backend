@@ -38,6 +38,7 @@ function groupOrders(items, statusHistory) {
       payment_status,
       payment_mode,
       order_total,
+      isPromotionApplied,
       currentStatus
     } = line;
 
@@ -54,6 +55,7 @@ function groupOrders(items, statusHistory) {
         payment_mode,
         order_total,
         currentStatus,
+        isPromotionApplied : isPromotionApplied ? true : false,
         services: []
       };
     }
