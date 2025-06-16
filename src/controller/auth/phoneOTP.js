@@ -27,8 +27,8 @@ const sendOtpForMobile = async(req,res)=>{
         
             await twilio.messages
             .create({
-                body: `Your OTP is ${newOTP} valid for 5 mins`,
-                from: TWILIO_PHONE_NUMBER,
+                body: `Your LAUNDRY-VAN OTP is ${newOTP} valid for 5 mins`,
+                from: "LAUNDRYVAN",
                 to: `+${countryCode}${phone}`
             })
             await conn.commit()
